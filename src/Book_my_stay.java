@@ -1,94 +1,70 @@
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Scanner;
+import java.util.*;
+
+// Add-On Service class
+class Service {
+    private String serviceName;
+    private double cost;
+
+    public Service(String serviceName, double cost) {
+        this.serviceName = serviceName;
+        this.cost = cost;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+}
+
+// Manager class for Add-On Services
+class AddOnServiceManager {
+
+    // Map: Reservation ID -> List of Services
+    private Map<String, List<Service>> reservationServices = new HashMap<>();
+
+    // Add service to reservation
+    public void addService(String reservationId, Service service) {
+        reservationServices
+                .computeIfAbsent(reservationId, k -> new ArrayList<>())
+                .add(service);
+    }
+
+    // Calculate total add-on cost
+    public double calculateTotalCost(String reservationId) {
+        List<Service> services = reservationServices.get(reservationId);
+
+        if (services == null) {
+            return 0;
+        }
+
+        double total = 0;
+        for (Service s : services) {
+            total += s.getCost();
+        }
+        return total;
+    }
+}
 
 public class Book_my_stay {
 
-    static class Reservation {
-        private String guestName;
-        private int numberOfRooms;
-
-        public Reservation(String guestName, int numberOfRooms) {
-            this.guestName = guestName;
-            this.numberOfRooms = numberOfRooms;
-        }
-
-        public String getGuestName() {
-            return guestName;
-        }
-
-        public int getNumberOfRooms() {
-            return numberOfRooms;
-        }
-
-        @Override
-        public String toString() {
-            return "Reservation{Guest='" + guestName + "', Rooms=" + numberOfRooms + "}";
-        }
-    }
-
-    private Queue<Reservation> bookingQueue;
-
-    public BookMyStayApp() {
-        bookingQueue = new LinkedList<>();
-    }
-
-    public void submitBookingRequest(String guestName, int rooms) {
-        Reservation reservation = new Reservation(guestName, rooms);
-        bookingQueue.add(reservation);
-        System.out.println("Booking request added to queue: " + reservation);
-    }
-
-    public void displayQueuedRequests() {
-        if (bookingQueue.isEmpty()) {
-            System.out.println("No booking requests in the queue.");
-        } else {
-            System.out.println("\nQueued Booking Requests (FIFO order):");
-            for (Reservation r : bookingQueue) {
-                System.out.println(r);
-            }
-        }
-    }
-
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        BookMyStayApp app = new BookMyStayApp();
 
-        System.out.println("=== Welcome to Book My Stay App ===");
+        System.out.println("Add-on Service selection");
 
-        boolean running = true;
-        while (running) {
-            System.out.println("\n1. Submit Booking Request");
-            System.out.println("2. View Booking Queue");
-            System.out.println("3. Exit");
-            System.out.print("Choose an option: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+        String reservationId = "Single-1";
 
-            switch (choice) {
-                case 1:
-                    System.out.print("Enter guest name: ");
-                    String name = scanner.nextLine();
-                    System.out.print("Enter number of rooms: ");
-                    int rooms = scanner.nextInt();
-                    scanner.nextLine();
-                    app.submitBookingRequest(name, rooms);
-                    break;
+        AddOnServiceManager manager = new AddOnServiceManager();
 
-                case 2:
-                    app.displayQueuedRequests();
-                    break;
+        // Guest selects services
+        manager.addService(reservationId, new Service("Spa", 800));
+        manager.addService(reservationId, new Service("Airport Pickup", 700));
 
-                case 3:
-                    running = false;
-                    System.out.println("Exiting Book My Stay App. Goodbye!");
-                    break;
+        double totalCost = manager.calculateTotalCost(reservationId);
 
-                default:
-                    System.out.println("Invalid option. Try again.");
-            }
-        }
-
-        scanner.close();
+        System.out.println("Reservation ID: " + reservationId);
+        System.out.println("Total Add-On-cost: " + (int)totalCost);
     }
 }
