@@ -1,84 +1,94 @@
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
 
-class Room {
-    private String type;
-    private double price;
-    private String amenities;
+public class Book_my_stay {
 
-    public Room(String type, double price, String amenities) {
-        this.type = type;
-        this.price = price;
-        this.amenities = amenities;
+    static class Reservation {
+        private String guestName;
+        private int numberOfRooms;
+
+        public Reservation(String guestName, int numberOfRooms) {
+            this.guestName = guestName;
+            this.numberOfRooms = numberOfRooms;
+        }
+
+        public String getGuestName() {
+            return guestName;
+        }
+
+        public int getNumberOfRooms() {
+            return numberOfRooms;
+        }
+
+        @Override
+        public String toString() {
+            return "Reservation{Guest='" + guestName + "', Rooms=" + numberOfRooms + "}";
+        }
     }
 
-    public String getType() {
-        return type;
+    private Queue<Reservation> bookingQueue;
+
+    public BookMyStayApp() {
+        bookingQueue = new LinkedList<>();
     }
 
-    public double getPrice() {
-        return price;
+    public void submitBookingRequest(String guestName, int rooms) {
+        Reservation reservation = new Reservation(guestName, rooms);
+        bookingQueue.add(reservation);
+        System.out.println("Booking request added to queue: " + reservation);
     }
 
-    public String getAmenities() {
-        return amenities;
-    }
-}
-
-class RoomInventory {
-    private HashMap<String, Integer> inventory;
-
-    public RoomInventory() {
-        inventory = new HashMap<>();
-    }
-
-    public void addRoomType(String type, int count) {
-        inventory.put(type, count);
-    }
-
-    public int getAvailability(String type) {
-        return inventory.getOrDefault(type, 0);
-    }
-
-    public Map<String, Integer> getAllAvailability() {
-        return inventory;
-    }
-}
-
-class SearchService {
-    private RoomInventory inventory;
-    private Map<String, Room> rooms;
-
-    public SearchService(RoomInventory inventory, Map<String, Room> rooms) {
-        this.inventory = inventory;
-        this.rooms = rooms;
-    }
-
-    public void searchAvailableRooms() {
-        for (Map.Entry<String, Integer> entry : inventory.getAllAvailability().entrySet()) {
-            if (entry.getValue() > 0) {
-                Room r = rooms.get(entry.getKey());
-                if (r != null) {
-                    System.out.println(r.getType() + " " + r.getPrice() + " " + r.getAmenities() + " Available:" + entry.getValue());
-                }
+    public void displayQueuedRequests() {
+        if (bookingQueue.isEmpty()) {
+            System.out.println("No booking requests in the queue.");
+        } else {
+            System.out.println("\nQueued Booking Requests (FIFO order):");
+            for (Reservation r : bookingQueue) {
+                System.out.println(r);
             }
         }
     }
-}
 
-public class Book_my_stay_app {
     public static void main(String[] args) {
-        RoomInventory inventory = new RoomInventory();
+        Scanner scanner = new Scanner(System.in);
+        BookMyStayApp app = new BookMyStayApp();
 
-        inventory.addRoomType("Standard", 10);
-        inventory.addRoomType("Deluxe", 5);
-        inventory.addRoomType("Suite", 0);
+        System.out.println("=== Welcome to Book My Stay App ===");
 
-        Map<String, Room> rooms = new HashMap<>();
-        rooms.put("Standard", new Room("Standard", 2000, "WiFi TV"));
-        rooms.put("Deluxe", new Room("Deluxe", 3500, "WiFi TV AC"));
-        rooms.put("Suite", new Room("Suite", 6000, "WiFi TV AC Jacuzzi"));
+        boolean running = true;
+        while (running) {
+            System.out.println("\n1. Submit Booking Request");
+            System.out.println("2. View Booking Queue");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
 
-        SearchService searchService = new SearchService(inventory, rooms);
-        searchService.searchAvailableRooms();
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter guest name: ");
+                    String name = scanner.nextLine();
+                    System.out.print("Enter number of rooms: ");
+                    int rooms = scanner.nextInt();
+                    scanner.nextLine();
+                    app.submitBookingRequest(name, rooms);
+                    break;
+
+                case 2:
+                    app.displayQueuedRequests();
+                    break;
+
+                case 3:
+                    running = false;
+                    System.out.println("Exiting Book My Stay App. Goodbye!");
+                    break;
+
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
+
+        scanner.close();
     }
 }
